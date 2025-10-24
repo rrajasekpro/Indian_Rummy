@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="description" content="Track scores for Indian Rummy games with multiple players">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rummy Scorer">
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSW5kaWFuIFJ1bW15IFNjb3JlciBBcHAiLCJzaG9ydF9uYW1lIjoiUnVtbXkgU2NvcmVyIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxNmEzNGEiLCJ0aGVtZV9jb2xvciI6IiMxNmEzNGEiLCJkZXNjcmlwdGlvbiI6IlRyYWNrIHNjb3JlcyBmb3IgSW5kaWFuIFJ1bW15IGdhbWVzIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjMxNmEzNGEnLyUzRSUzQ3RleHQgeD0nNTAnIHk9JzY1JyBmb250LXNpemU9JzUwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J0FyaWFsJyUzRVIlM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2316a34a'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='Arial'%3ER%3C/text%3E%3C/svg%3E">
+  <title>Indian Rummy Scorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: pan-y;
+    }
+    #root {
+      width: 100%;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    input {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Lucide React Icons (inline)
+    const Plus = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+    const Users = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    const Trophy = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
+    const RotateCcw = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
+    const Trash2 = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>;
+    const Settings = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+    const Download = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
+
+    function App() {
+      const [players, setPlayers] = useState([]);
+      const [newPlayerName, setNewPlayerName] = useState('');
+      const [roundScores, setRoundScores] = useState({});
+      const [currentRound, setCurrentRound] = useState(1);
+      const [gameStarted, setGameStarted] = useState(false);
+      const [maxPlayers, setMaxPlayers] = useState(6);
+      const [totalRounds, setTotalRounds] = useState(0);
+      const [showSettings, setShowSettings] = useState(false);
+      const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+      const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+      useEffect(() => {
+        // Check if app is installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          setShowInstallPrompt(false);
+        } else {
+          setShowInstallPrompt(true);
+        }
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          setDeferredPrompt(e);
+          setShowInstallPrompt(true);
+        });
+      }, []);
+
+      const handleInstallClick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          setDeferredPrompt(null);
+          setShowInstallPrompt(false);
+        }
+      };
+
+      const addPlayer = () => {
+        if (newPlayerName.trim() && players.length < maxPlayers) {
+          const newPlayer = {
+            id: Date.now(),
+            name: newPlayerName.trim(),
+            totalScore: 0
+          };
+          setPlayers([...players, newPlayer]);
+          setNewPlayerName('');
+        }
+      };
+
+      const removePlayer = (id) => {
+        setPlayers(players.filter(p => p.id !== id));
+        const newRoundScores = { ...roundScores };
+        delete newRoundScores[id];
+        setRoundScores(newRoundScores);
+      };
+
+      const startGame = () => {
+        if (players.length >= 2) {
+          setGameStarted(true);
+          const initialScores = {};
+          players.forEach(player => {
+            initialScores[player.id] = '';
+          });
+          setRoundScores(initialScores);
+        }
+      };
+
+      const updateRoundScore = (playerId, score) => {
+        setRoundScores({
+          ...roundScores,
+          [playerId]: score
+        });
+      };
+
+      const submitRound = () => {
+        const zeroScorePlayers = players.filter(player => {
+          const score = parseInt(roundScores[player.id]) || 0;
+          return score === 0;
+        });
+
+        if (zeroScorePlayers.length !== 1) {
+          alert('Exactly ONE player must have a score of 0 for each round!');
+          return;
+        }
+
+        const updatedPlayers = players.map(player => {
+          const score = parseInt(roundScores[player.id]) || 0;
+          return {
+            ...player,
+            totalScore: player.totalScore + score
+          };
+        });
+        setPlayers(updatedPlayers);
+        
+        const newRoundScores = {};
+        players.forEach(player => {
+          newRoundScores[player.id] = '';
+        });
+        setRoundScores(newRoundScores);
+        setCurrentRound(currentRound + 1);
+      };
+
+      const isGameComplete = totalRounds > 0 && currentRound > totalRounds;
+
+      const resetGame = () => {
+        setPlayers([]);
+        setRoundScores({});
+        setCurrentRound(1);
+        setGameStarted(false);
+        setShowSettings(false);
+      };
+
+      const winner = players.length > 0 
+        ? players.reduce((min, player) => player.totalScore < min.totalScore ? player : min, players[0])
+        : null;
+
+      const currentZeroScorePlayers = players.filter(player => {
+        const score = parseInt(roundScores[player.id]) || 0;
+        return score === 0;
+      }).length;
+
+      if (!gameStarted) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-800 p-4">
+            <div className="max-w-md mx-auto">
+              {showInstallPrompt && (
+                <div className="bg-blue-500 text-white p-4 rounded-xl shadow-lg mb-4 mt-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1 flex items-center">
+                        <Download size={18} className="mr-2" />
+                        Install App
+                      </h3>
+                      <p className="text-sm mb-3">Add to your home screen for the best experience!</p>
+                      {deferredPrompt ? (
+                        <button
+                          onClick={handleInstallClick}
+                          className="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold"
+                        >
+                          Install Now
+                        </button>
+                      ) : (
+                        <p className="text-xs">
+                          <strong>iOS:</strong> Tap Share → Add to Home Screen<br/>
+                          <strong>Android:</strong> Tap Menu → Install App
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowInstallPrompt(false)}
+                      className="text-white hover:text-gray-200 ml-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-white rounded-2xl shadow-2xl p-6 mt-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <Trophy className="text-yellow-500 mr-2" size={32} />
+                    <h1 className="text-3xl font-bold text-gray-800">Indian Rummy</h1>
+                  </div>
+                  <button
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="text-gray-600 hover:text-gray-800 transition"
+                  >
+                    <Settings size={24} />
+                  </button>
+                </div>
+
+                {showSettings && (
+                  <div className="mb-6 bg-gray-50 rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Game Settings</h3>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Maximum Players
+                      </label>
+                      <select
+                        value={maxPlayers}
+                        onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value={2}>2 Players</option>
+                        <option value={3}>3 Players</option>
+                        <option value={4}>4 Players</option>
+                        <option value={5}>5 Players</option>
+                        <option value={6}>6 Players</option>
+                        <option value={7}>7 Players</option>
+                        <option value={8}>8 Players</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Rounds
+                      </label>
+                      <select
+                        value={totalRounds}
+                        onChange={(e) => setTotalRounds(parseInt(e.target.value))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value={0}>Unlimited</option>
+                        <option value={5}>5 Rounds</option>
+                        <option value={6}>6 Rounds</option>
+                        <option value={7}>7 Rounds</option>
+                        <option value={10}>10 Rounds</option>
+                        <option value={13}>13 Rounds</option>
+                        <option value={15}>15 Rounds</option>
+                        <option value={20}>20 Rounds</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Add Players (2-{maxPlayers})
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newPlayerName}
+                      onChange={(e) => setNewPlayerName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addPlayer()}
+                      placeholder="Player name"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      maxLength={20}
+                    />
+                    <button
+                      onClick={addPlayer}
+                      disabled={players.length >= maxPlayers}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                    >
+                      <Plus size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                {players.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                      <Users size={18} className="mr-2" />
+                      Players ({players.length})
+                    </h3>
+                    <div className="space-y-2">
+                      {players.map(player => (
+                        <div key={player.id} className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+                          <span className="font-medium text-gray-800">{player.name}</span>
+                          <button
+                            onClick={() => removePlayer(player.id)}
+                            className="text-red-500 hover:text-red-700 transition"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={startGame}
+                  disabled={players.length < 2}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition text-lg"
+                >
+                  Start Game
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-800 p-4 pb-24">
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 mt-4">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Round {currentRound}</h2>
+                  {totalRounds > 0 && (
+                    <p className="text-sm text-gray-600">of {totalRounds}</p>
+                  )}
+                </div>
+                <button
+                  onClick={resetGame}
+                  className="text-gray-600 hover:text-gray-800 transition"
+                >
+                  <RotateCcw size={24} />
+                </button>
+              </div>
+
+              {isGameComplete ? (
+                <div className="text-center py-8">
+                  <Trophy className="text-yellow-500 mx-auto mb-4" size={64} />
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">Game Over!</h2>
+                  <p className="text-xl text-gray-600 mb-6">Winner: {winner?.name}</p>
+                  
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Final Scores</h3>
+                    <div className="space-y-2">
+                      {[...players].sort((a, b) => a.totalScore - b.totalScore).map((player, index) => (
+                        <div key={player.id} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mr-3 ${
+                              index === 0 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-300 text-gray-700'
+                            }`}>
+                              {index + 1}
+                            </span>
+                            <span className="font-medium text-gray-800">{player.name}</span>
+                          </div>
+                          <span className={`font-bold ${
+                            player.id === winner?.id ? 'text-green-600' : 'text-gray-600'
+                          }`}>
+                            {player.totalScore}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={resetGame}
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
+                  >
+                    New Game
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 bg-gray-50 rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3 flex items-center">
+                      <Trophy size={16} className="mr-2 text-yellow-500" />
+                      Current Standings
+                    </h3>
+                    <div className="space-y-2">
+                      {[...players].sort((a, b) => a.totalScore - b.totalScore).map((player, index) => (
+                        <div key={player.id} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mr-3 ${
+                              index === 0 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-300 text-gray-700'
+                            }`}>
+                              {index + 1}
+                            </span>
+                            <span className="font-medium text-gray-800">{player.name}</span>
+                          </div>
+                          <span className={`font-bold ${
+                            player.id === winner?.id ? 'text-green-600' : 'text-gray-600'
+                          }`}>
+                            {player.totalScore}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-6">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Enter Scores for Round {currentRound}</h3>
+                    {players.map(player => (
+                      <div key={player.id} className="flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg">
+                        <label className="font-medium text-gray-800">{player.name}</label>
+                        <input
+                          type="number"
+                          value={roundScores[player.id] || ''}
+                          onChange={(e) => updateRoundScore(player.id, e.target.value)}
+                          placeholder="0"
+                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={submitRound}
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
+                  >
+                    Submit Round
+                  </button>
+
+                  {currentZeroScorePlayers !== 1 && (
+                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800 text-center">
+                        ⚠️ Exactly ONE player must score 0 each round
+                        {currentZeroScorePlayers === 0 && ' (none selected)'}
+                        {currentZeroScorePlayers > 1 && ` (${currentZeroScorePlayers} selected)`}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-center text-sm text-gray-500">
+                    Lower score wins • One player scores 0 per round
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+
+  <script>
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          const CACHE_NAME = 'rummy-scorer-v1';
+          const urlsToCache = ['/'];
+
+          self.addEventListener('install', event => {
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then(cache => cache.addAll(urlsToCache))
+            );
+          });
+
+          self.addEventListener('fetch', event => {
+            event.respondWith(
+              caches.match(event.request)
+                .then(response => response || fetch(event.request))
+            );
+          });
+        `;
+        
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        
+        navigator.serviceWorker.register(swUrl)
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
